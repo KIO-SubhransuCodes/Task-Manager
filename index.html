@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Task Manager</title>
+  <link rel="stylesheet" href="Project.css">
+</head>
+
+<body>
+  <header>
+    <h1>Task <span>Manager</span></h1>
+  </header>
+
+  <nav>
+    <a href="#" onclick="showSection('home')">Home</a>
+    <a href="#" onclick="showSection('createTask')">Create Task</a>
+    <a href="#" onclick="showSection('taskList')">Task List</a>
+    <a href="#" onclick="showSection('login')">Login</a>
+  </nav>
+
+  <main>
+    <section id="home" class="active">
+      <div class="home-row">
+        <div class="home-column" style="text-align: left;">
+          <b>Welcome to your personal task management hub! Whether you're juggling multiple projects at work, handling
+            everyday chores at home, or managing personal goals, Task Manager is here to make it all easier.</b>
+          <p>With Task Manager, you can easily create tasks and categorize them into different areas of your life. From
+            "Work" to "Personal" to "Urgent" tasks, organize your to-dos by type, priority, and deadline.</p>
+        </div>
+        <div class="home-column">
+          <h2>Why Choose Task Manager?</h2>
+          <p>Task Manager is built to help you stay on top of your goals with ease. From setting up tasks in seconds to
+            managing deadlines and priorities, it’s your ultimate productivity tool.</p>
+          <button onclick="showSection('createTask')">Get Started</button>
+        </div>
+      </div>
+      <h2>Features You’ll Love</h2>
+      <div class="features-row">
+        <div class="highlight-box">
+          <h4>✅ Easy Access & Login</h4>
+          <p>Log in securely from any device and get started right away.</p>
+        </div>
+        <div class="highlight-box">
+          <h4>✅ Easy to Edit & Manage</h4>
+          <p>Update, edit, and organize your tasks effortlessly.</p>
+        </div>
+        <div class="highlight-box">
+          <h4>✅ Keep Track of Everything</h4>
+          <p>Stay organized with clear deadlines and priorities.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="createTask">
+      <h2>Create New Task</h2>
+      <form id="taskForm">
+        <input type="hidden" id="editIndex" value="-1">
+        <div class="form-group">
+          <label for="taskName">Task Name</label>
+          <input type="text" id="taskName" required />
+        </div>
+        <div class="form-group">
+          <label for="taskDesc">Description</label>
+          <textarea id="taskDesc"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="taskCategory">Category</label>
+          <select id="taskCategory">
+            <option>Work</option>
+            <option>Home</option>
+            <option>Personal</option>
+            <option>Urgent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskPriority">Priority</label>
+          <select id="taskPriority">
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" />
+        </div>
+        <div class="form-group">
+          <label for="dueDate">Due Date</label>
+          <input type="date" id="dueDate" />
+        </div>
+        <button type="submit">Save Task</button>
+      </form>
+    </section>
+
+    <section id="taskList">
+      <h2>All Tasks</h2>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search tasks..." />
+      </div>
+      <div id="taskContainer"></div>
+    </section>
+
+    <section id="login">
+      <h2>User Login</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="username" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" required />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; K.Subhransu and Surbhav limited. All Rights Reserved 2025.</p>
+  </footer>
+
+  <script>
+    let tasks = [];
+
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(sec => {
+        sec.classList.remove('active');
+        sec.style.display = 'none';
+      });
+      const target = document.getElementById(id);
+      target.style.display = 'block';
+      setTimeout(() => target.classList.add('active'), 10);
+      if (id === 'taskList') renderTasks();
+    }
+
+    document.getElementById('taskForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = document.getElementById('taskName').value;
+      const desc = document.getElementById('taskDesc').value;
+      const category = document.getElementById('taskCategory').value;
+      const priority = document.getElementById('taskPriority').value;
+      const start = document.getElementById('startDate').value;
+      const due = document.getElementById('dueDate').value;
+      const index = document.getElementById('editIndex').value;
+      const task = { name, desc, category, priority, start, due };
+      if (index === "-1") {
+        tasks.push(task);
+        alert("Task added!");
+      } else {
+        tasks[index] = task;
+        alert("Task updated!");
+        document.getElementById('editIndex').value = -1;
+      }
+      this.reset();
+      showSection('taskList');
+    });
+
+    function renderTasks(filter = '') {
+      const container = document.getElementById('taskContainer');
+      container.innerHTML = '';
+      const filtered = tasks.filter(t => t.name.toLowerCase().includes(filter.toLowerCase()));
+      if (filtered.length === 0) {
+        container.innerHTML = '<p>No tasks found.</p>';
+        return;
+      }
+      filtered.forEach((task, index) => {
+        const card = document.createElement('div');
+        card.className = 'task-card';
+        card.innerHTML = `
+          <strong>${task.name}</strong><br>
+          <em>${task.category}</em> | <b>Priority:</b> ${task.priority}<br>
+          <b>Start:</b> ${task.start} | <b>Due:</b> ${task.due}<br>
+          <p>${task.desc}</p>
+          <button class="edit-btn" onclick="editTask(${index})">Edit</button>
+          <button class="delete-btn" onclick="deleteTask(${index})">Delete</button>`;
+        container.appendChild(card);
+      });
+    }
+
+    function editTask(index) {
+      const task = tasks[index];
+      document.getElementById('taskName').value = task.name;
+      document.getElementById('taskDesc').value = task.desc;
+      document.getElementById('taskCategory').value = task.category;
+      document.getElementById('taskPriority').value = task.priority;
+      document.getElementById('startDate').value = task.start;
+      document.getElementById('dueDate').value = task.due;
+      document.getElementById('editIndex').value = index;
+      showSection('createTask');
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      renderTasks();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function () {
+      renderTasks(this.value);
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      alert('Welcome, ' + username + '!');
+      this.reset();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.add('loaded');
+    });
+  </script>
+</body>
+
+</html>
